@@ -34,16 +34,27 @@ export function Session() {
     try {
       const [termData, monitoring] = await Promise.all([getTerm(), getMonitoring()]);
 
-      const map = new Map<string, { studyYear: string; semester: number }>();
-      monitoring.disciplines.forEach((d) => {
-        map.set(d.name, { studyYear: d.studyYear, semester: d.semester });
-      });
+      const normalize = (str: string) =>
+        str.toLowerCase().replace(/[\s.,]+/g, '');
 
-      const disciplines = termData.disciplines.map((d) => ({
-        ...d,
-        studyYear: map.get(d.name)?.studyYear,
-        semester: map.get(d.name)?.semester,
-      }));
+      const disciplines = termData.disciplines.map((d) => {
+        const normalizedName = normalize(d.name);
+        const match =
+          monitoring.disciplines.find(
+            (m) => normalize(m.name) === normalizedName,
+          ) ??
+          monitoring.disciplines.find(
+            (m) =>
+              normalize(m.name).includes(normalizedName) ||
+              normalizedName.includes(normalize(m.name)),
+          );
+
+        return {
+          ...d,
+          studyYear: match?.studyYear,
+          semester: match?.semester,
+        };
+      });
 
       setTerm({ ...termData, studyYears: monitoring.studyYears, disciplines });
     } catch (error) {
