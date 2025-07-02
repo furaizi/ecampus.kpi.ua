@@ -8,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useTranslations } from 'next-intl';
 import { dash } from 'radash';
 import { getTerm } from '@/actions/term.actions';
+import { getMonitoring } from '@/actions/monitoring.actions';
 import { Term, TermDiscipline } from '@/types/models/term';
 import { Semester } from '@/types/enums/current-control/semester';
 import { useLocalStorage } from '@/hooks/use-storage';
@@ -31,8 +32,20 @@ export function Session() {
 
   const fetchData = useCallback(async () => {
     try {
-      const data = await getTerm();
-      setTerm(data);
+      const [termData, monitoring] = await Promise.all([getTerm(), getMonitoring()]);
+
+      const map = new Map<string, { studyYear: string; semester: number }>();
+      monitoring.disciplines.forEach((d) => {
+        map.set(d.name, { studyYear: d.studyYear, semester: d.semester });
+      });
+
+      const disciplines = termData.disciplines.map((d) => ({
+        ...d,
+        studyYear: map.get(d.name)?.studyYear,
+        semester: map.get(d.name)?.semester,
+      }));
+
+      setTerm({ ...termData, studyYears: monitoring.studyYears, disciplines });
     } catch (error) {
       errorToast();
     } finally {
@@ -61,14 +74,20 @@ export function Session() {
 
   const currentYear = studyYears.at(-1) || '';
 
-  const [selectedStudyYear = currentYear, setSelectedStudyYear] = useLocalStorage<string>('termStudyYear');
+  const [selectedStudyYear, setSelectedStudyYear] = useLocalStorage<string>('termStudyYear');
   const [selectedSemester = Semester.All, setSelectedSemester] = useLocalStorage<Semester>('termSemester');
+
+  useEffect(() => {
+    if (!selectedStudyYear && currentYear) {
+      setSelectedStudyYear(currentYear);
+    }
+  }, [currentYear, selectedStudyYear, setSelectedStudyYear]);
 
   const filteredDisciplines = useMemo(() => {
     return disciplines.filter((d) => {
       const matchesYear = !selectedStudyYear || (d as any).studyYear === selectedStudyYear;
       const matchesSemester =
-        selectedSemester === Semester.All || String((d as any).semester) === selectedSemester;
+        selectedSemester === Semester.All || String((d as any).semester ?? '') === selectedSemester;
       return matchesYear && matchesSemester;
     });
   }, [disciplines, selectedSemester, selectedStudyYear]);
