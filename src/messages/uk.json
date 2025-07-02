@@ -438,7 +438,8 @@
       "sessionType": "Тип відомості",
       "lecturer": "Викладач",
       "status": "Статус",
-      "average-score": "Середній бал:"
+      "average-score": "Середній бал:",
+      "your-information": "Ваші відомості:"
     },
     "study-sheet": {
       "title": "Поточний контроль",

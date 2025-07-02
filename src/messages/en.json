@@ -438,7 +438,8 @@
       "sessionType": "Session order type",
       "lecturer": "Lecturer",
       "status": "Status",
-      "average-score": "Average score:"
+      "average-score": "Average score:",
+      "your-information": "Your order:"
     },
     "study-sheet": {
       "title": "Current control",
