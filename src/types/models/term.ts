@@ -6,6 +6,8 @@ import { Lecturer } from './lecturer';
 export interface TermDiscipline {
   name: string;
   mark?: number;
+  studyYear?: string;
+  semester?: number;
   assessmentType: AssessmentType;
   recordType: RecordType;
   date?: string;
