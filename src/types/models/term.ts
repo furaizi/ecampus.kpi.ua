@@ -18,4 +18,5 @@ export interface TermDiscipline {
 export interface Term {
   disciplines: TermDiscipline[];
   averageScore: number;
+  studyYears?: string[];
 }

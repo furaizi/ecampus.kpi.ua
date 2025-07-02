@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Heading6 } from '@/components/typography';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useTranslations } from 'next-intl';
 import { dash } from 'radash';
@@ -46,6 +47,9 @@ export function Session() {
   const disciplines: TermDiscipline[] = term?.disciplines ?? [];
 
   const studyYears = useMemo(() => {
+    if (term?.studyYears?.length) {
+      return term.studyYears;
+    }
     const years = new Set<string>();
     disciplines.forEach((d) => {
       if ((d as any).studyYear) {
@@ -53,7 +57,7 @@ export function Session() {
       }
     });
     return Array.from(years);
-  }, [disciplines]);
+  }, [term?.studyYears, disciplines]);
 
   const currentYear = studyYears.at(-1) || '';
 
@@ -94,6 +98,7 @@ export function Session() {
   return (
     <Card className="rounded-b-6 col-span-full w-full bg-white p-6 xl:col-span-5">
       <div className="mb-4 flex flex-col lg:flex-row lg:items-center">
+        <Heading6 className="mr-auto text-neutral-900">{t('your-information')}</Heading6>
         <SessionFilters
           studyYears={studyYears}
           currentYear={currentYear}
