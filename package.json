@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "next lint",
+    "test": "node --test",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

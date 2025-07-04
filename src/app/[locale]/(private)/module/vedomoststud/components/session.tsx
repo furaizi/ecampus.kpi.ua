@@ -34,20 +34,20 @@ export function Session() {
     try {
       const [termData, monitoring] = await Promise.all([getTerm(), getMonitoring()]);
 
-      const normalize = (str: string) =>
-        str.toLowerCase().replace(/[\s.,]+/g, '');
+      const normalize = (str: string) => str.toLowerCase().replace(/[\s.,]+/g, '');
+
+      const disciplineMap = new Map<string, (typeof monitoring.disciplines)[number]>();
+      monitoring.disciplines.forEach((m) => {
+        const base = normalize(m.name);
+        const lecturer = m.lecturers[0]?.fullName ? normalize(m.lecturers[0].fullName) : '';
+        disciplineMap.set(`${base}_${lecturer}`, m);
+        disciplineMap.set(base, m);
+      });
 
       const disciplines = termData.disciplines.map((d) => {
-        const normalizedName = normalize(d.name);
-        const match =
-          monitoring.disciplines.find(
-            (m) => normalize(m.name) === normalizedName,
-          ) ??
-          monitoring.disciplines.find(
-            (m) =>
-              normalize(m.name).includes(normalizedName) ||
-              normalizedName.includes(normalize(m.name)),
-          );
+        const base = normalize(d.name);
+        const lecturer = d.lecturer?.fullName ? normalize(d.lecturer.fullName) : '';
+        const match = disciplineMap.get(`${base}_${lecturer}`) || disciplineMap.get(base);
 
         return {
           ...d,
