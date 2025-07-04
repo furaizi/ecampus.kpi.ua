@@ -51,8 +51,8 @@ export function Session() {
 
         return {
           ...d,
-          studyYear: match?.studyYear,
-          semester: match?.semester,
+          studyYear: match?.studyYear ?? defaultYear,
+          semester: match?.semester ?? Semester.First,
         };
       });
 
