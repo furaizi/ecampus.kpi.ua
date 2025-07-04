@@ -34,25 +34,25 @@ export function Session() {
     try {
       const [termData, monitoring] = await Promise.all([getTerm(), getMonitoring()]);
 
-      const normalize = (str: string) =>
-        str.toLowerCase().replace(/[\s.,]+/g, '');
+      const normalize = (str: string) => str.toLowerCase().replace(/[\s.,]+/g, '');
+
+      const disciplineMap = new Map<string, (typeof monitoring.disciplines)[number]>();
+      monitoring.disciplines.forEach((m) => {
+        const key = `${normalize(m.name)}_${m.lecturers[0]?.fullName ? normalize(m.lecturers[0].fullName) : ''}`;
+        disciplineMap.set(key, m);
+        disciplineMap.set(normalize(m.name), m);
+      });
+
+      const defaultYear = monitoring.studyYears.at(-1) || '';
 
       const disciplines = termData.disciplines.map((d) => {
-        const normalizedName = normalize(d.name);
-        const match =
-          monitoring.disciplines.find(
-            (m) => normalize(m.name) === normalizedName,
-          ) ??
-          monitoring.disciplines.find(
-            (m) =>
-              normalize(m.name).includes(normalizedName) ||
-              normalizedName.includes(normalize(m.name)),
-          );
+        const key = `${normalize(d.name)}_${d.lecturer?.fullName ? normalize(d.lecturer.fullName) : ''}`;
+        const match = disciplineMap.get(key) || disciplineMap.get(normalize(d.name));
 
         return {
           ...d,
-          studyYear: match?.studyYear,
-          semester: match?.semester,
+          studyYear: match?.studyYear ?? defaultYear,
+          semester: match?.semester ?? Semester.First,
         };
       });
 
